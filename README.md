@@ -1,55 +1,58 @@
-# Marketplace Delivery Performance & Operational Prioritization
+# 电商平台履约异常诊断与运营优化优先级分析
 
-Olist fulfillment analytics project that turns Brazilian marketplace orders into a prioritized operational review of peak months, delivery lanes, and a historical seller cohort.
+*Marketplace Delivery Performance & Operational Prioritization*
 
-本项目以巴西 Olist 电商订单为样本，分析配送延误与低评分的关联，识别高峰期应优先排查的线路与商家。Dashboard 使用简体中文，业务报告为中文 PDF。
+基于巴西 Olist 电商订单，定位配送延误集中出现的月份和线路，分析延误与低评分的关联，并筛选高峰期应优先排查的商家。项目提供**简体中文 Dashboard** 和**中文版正式业务报告**。
 
-[Business report (PDF, Chinese)](reports/business_report.pdf) · [Report source](reports/business_report.md) · [Seller review queue](reports/seller_prioritization.md)
+[中文版业务报告（PDF）](reports/business_report.pdf) · [报告源文件](reports/business_report.md) · [商家排查名单](reports/seller_prioritization.md)
 
-## Business problem
+## 业务问题
 
-Where should an operations team investigate first when it can review only a limited number of delivery exceptions? This project combines delay volume, stage duration, customer ratings, and the persistence of seller signals to decide which orders and routes to review.
+当运营团队只能排查有限数量的订单与线路时，应该从哪里入手？项目结合延误规模、各履约阶段耗时、客户评分和商家风险的跨期稳定性，确定优先排查范围，并估算不同改善幅度下的延误订单量。
 
-## Data and method
+## 数据来源与分析方法
 
-The source is the [official Kaggle Olist Brazilian E-Commerce Public Dataset, v2](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce/versions/2), archive version ID 2669146. The full snapshot covers **99,441 orders placed from 2016-09-04 to 2018-10-17**. The primary time-series and adjusted model use orders placed **January 2017–July 2018**. The [snapshot manifest](data/snapshot.json) fixes the nine CSV fingerprints.
+数据来自 [Kaggle 官方 Olist 巴西电商公开数据集（第 2 版）](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce/versions/2)，归档版本 ID 为 `2669146`。完整数据覆盖 **2016-09-04 至 2018-10-17 的 99,441 笔订单**。主要月度趋势和调整模型采用 **2017 年 1 月至 2018 年 7 月**的下单样本。[数据快照说明](data/snapshot.json)记录了 9 份 CSV 的文件指纹。
 
-DuckDB builds order and order–seller facts after reducing one-to-many item, payment, and review records to the appropriate grain. A late order is a delivered order whose valid actual delivery day exceeds the promised day. The analysis uses mutually exclusive primary categories, a logistic regression on low ratings (score ≤2), and seller scores based on single-seller orders. [Metric definitions](reports/data_dictionary.md) · [Data quality audit](reports/data_quality_report.md)
+- **数据建模**。使用 SQL 和 DuckDB 处理商品、支付和评价的一对多关系，构建订单及订单—商家事实表。对已交付且能有效比较签收日期与承诺日期的订单，实际签收日期晚于承诺日期即判为延误。品类分析为每笔订单归入一个主品类。
+- **关联与排序**。使用 Python 进行统计分析，通过 Logistic Regression 估计配送延误与低评分（评分 ≤2）的关联。商家评分基于单商家订单，并通过跨期比较和同组商家对照确定排查优先级。
 
-## Key findings and recommendations
+[指标口径](reports/data_dictionary.md) · [数据质量检查](reports/data_quality_report.md)
 
-| Evidence | Decision |
+## 主要发现与运营建议
+
+| 主要发现 | 建议行动 |
 | --- | --- |
-| **6,534 / 96,470 eligible orders were late (6.77%)**. Nov 2017, Feb 2018, and Mar 2018 reached **12.40%, 14.13%, and 18.96%** and accounted for 51.45% of late orders in the mature window. | Review capacity and handoff around late November and the transit tail in February–March. |
-| SP had **1,820** late orders. RJ had **1,495** and a **12.11%** late rate. Median transit was **26.20 days** for late orders and **6.95** for on-time orders. | Start with high-volume RJ lanes and track SP separately for workload. Reconcile carrier events before assigning responsibility. |
-| Low ratings were **62.42%** among rated late orders and **9.27%** among rated on-time orders. Adjusted OR **15.44** (95% CI 14.52–16.41), controlling for purchase month, destination state, and primary category. | Test early exception tracking and customer communication. Measure effects in the pilot. |
-| Seller scores across 2017 and Jan–Jul 2018 had Spearman **ρ = 0.371** among 96 sellers with at least 50 eligible orders in each window. The top tens shared **2** sellers. | Review the **21** sellers with positive smoothed excess in both windows, ≥70% holdout peer coverage, and positive observed-minus-expected delays within destination state × primary-category strata. |
-| The cohort had **366 / 1,522** late orders in Feb–Mar 2018. Relative reductions of **10% and 20%** imply **36.6 and 73.2** fewer late orders at fixed volume and mix. | Use the estimates for scenario planning and validate realized improvements in a comparable future peak. |
+| **96,470 笔可判定延误订单中，6,534 笔延误，延误率为 6.77%**。2017 年 11 月、2018 年 2 月和 3 月的延误率分别为 **12.40%、14.13%、18.96%**。这三个月合计占成熟观察期延误订单的 **51.45%**。 | 复盘 11 月下旬的运力和交接情况，并重点检查 2–3 月运输耗时特别长的订单。 |
+| SP 州有 **1,820 笔**延误，RJ 州有 **1,495 笔**延误，延误率为 **12.11%**。按期订单运输耗时中位数为 **6.95 天**，延误订单为 **26.20 天**。 | 优先排查 RJ 订单量较大的线路，持续跟踪 SP 的延误规模。结合承运记录核实责任环节。 |
+| 在有有效评分的订单中，延误组与按期组的低评分率分别为 **62.42%** 和 **9.27%**。控制下单月份、收货州及订单主品类后，调整优势比（OR）为 **15.44**，95% 置信区间为 **14.52–16.41**。 | 对可能延误的订单试行提前跟踪与客户沟通，通过试点评估实际效果。 |
+| 在 2017 年和 2018 年 1–7 月均至少有 **50 笔**可判定延误订单的 **96 家**商家中，两期评分的斯皮尔曼秩相关系数为 **ρ = 0.371**，两期前十名仅重合 **2 家**。 | 优先排查 **21 家**商家。筛选条件为两期平滑超额延误均为正、验证期同行对照覆盖率 **≥70%**，且在相同收货州与订单主品类下，实际延误高于同行预期。 |
+| 这 21 家商家在 2018 年 2–3 月的 **1,522 笔**可判定延误订单中，有 **366 笔**延误。固定订单量与样本构成时，延误率相对下降 **10%** 或 **20%**，预计分别减少 **36.6 笔**或 **73.2 笔**延误。 | 将情景估算用于试点规划，在后续可比高峰期验证实际改善幅度。 |
 
-![Monthly delivery trends in the mature window](figures/monthly_delivery.png)
+![成熟观察期的月度配送延误趋势](figures/monthly_delivery.png)
 
-## Dashboard preview
+## 中文版 Dashboard
 
-The dashboard uses Simplified Chinese. Executive Overview and Delivery Diagnostics apply the same purchase-month, destination-state, and primary-category filters to their metrics and charts. Customer Experience, Seller Prioritization, and Improvement Scenarios label their fixed analysis samples. The scenario slider varies the relative reduction from 0% to 30%.
+经营与履约概览、履约异常诊断支持按下单月份、收货州和订单主品类筛选，指标与图表按同一范围更新。客户体验、商家排查和改善情景页面均标注各自的固定分析样本。情景滑块支持将延误率相对降幅设在 0%–30%。
 
 [![经营与履约概览](figures/dashboard_overview.png)](figures/dashboard_overview.png)
 
 [履约异常诊断](figures/dashboard_delivery.png) · [客户体验分析](figures/dashboard_experience.png) · [商家排查优先级](figures/dashboard_sellers.png) · [改善情景测算](figures/dashboard_scenarios.png)
 
-## Repository structure
+## 项目结构
 
-| Path | Purpose |
+| 目录 | 内容 |
 | --- | --- |
-| `sql/`, `src/` | DuckDB fact models, data checks, statistics, and analysis exports |
-| `analysis/` | Raw audit, delivery diagnostics, and seller prioritization SQL |
-| `dashboard/` | Five-page local Streamlit app |
-| `tests/`, `scripts/` | Model tests, live browser checks, and PDF generation |
-| `data/` | Source manifest and local data directories |
-| `figures/`, `reports/` | Figures, portfolio report, seller queue, and acceptance record |
+| `sql/`、`src/` | DuckDB 事实表建模、数据检查、统计分析和结果导出 |
+| `analysis/` | 数据核验、履约诊断和商家优先级分析 SQL |
+| `dashboard/` | 五页简体中文 Streamlit 应用 |
+| `tests/`、`scripts/` | 模型测试、浏览器验收和 PDF 导出 |
+| `data/` | 数据来源、版本指纹及本地数据目录 |
+| `figures/`、`reports/` | 分析图表、界面截图、正式报告、商家名单和验收记录 |
 
-## Reproduction
+## 本地复现
 
-Tested on Apple Silicon macOS with Python 3.14. Run from the repository root.
+已在 Apple Silicon macOS 与 Python 3.14 环境验证。在项目根目录运行以下命令。
 
 ```bash
 python3.14 -m venv .venv
@@ -58,9 +61,9 @@ make analysis
 .venv/bin/streamlit run dashboard/app.py
 ```
 
-`make analysis` verifies the source fingerprints, builds DuckDB, runs the model tests, and writes report tables to `data/processed/analysis/`. If the official ZIP is already available, import it once with `.venv/bin/python -m src.fetch_data --archive ~/Downloads/brazilian-ecommerce.zip` before running the build. See [data setup](data/README.md). The dashboard reads local outputs on startup and caches them.
+`make analysis` 校验数据指纹、构建 DuckDB、运行模型测试，并将分析表写入 `data/processed/analysis/`。Streamlit 启动时读取并缓存本地结果。已有官方 ZIP 时，可先运行 `.venv/bin/python -m src.fetch_data --archive ~/Downloads/brazilian-ecommerce.zip` 导入数据。[数据准备说明](data/README.md)
 
-To reproduce browser checks or print the Markdown report, install the optional delivery dependencies. Both checks require Google Chrome. PDF export also requires Pandoc and an installed Chinese font such as PingFang SC or Noto Sans CJK SC. Run the browser check while Streamlit is running on its default local port.
+浏览器验收和 PDF 导出需安装可选依赖和 Google Chrome。PDF 导出还需要 Pandoc 和系统已安装的中文字体，例如苹方或思源黑体。运行浏览器验收时，请保持 Streamlit 在默认本地端口运行。
 
 ```bash
 .venv/bin/python -m pip install -r requirements-delivery.txt
@@ -68,6 +71,8 @@ To reproduce browser checks or print the Markdown report, install the optional d
 .venv/bin/python scripts/render_report.py
 ```
 
-## Limitations
+## 局限性
 
-Carrier event details and an explicit extraction cutoff are absent. Phase times guide investigation, and late snapshot months have limited coverage. Review coverage differs by delivery outcome. The seller cohort uses historical holdout information and needs a new peak-period validation. Adjusted odds ratios are associational, and scenario counts depend on stated assumptions. [Analysis evidence](reports/analysis_findings.md) · [Delivery acceptance](reports/release_validation.md)
+数据缺少细粒度承运事件和明确的抽取截止日期。阶段耗时可用于定位排查环节，数据末端月份需谨慎比较。延误组与按期组的评分覆盖率存在差异，调整 OR 反映历史关联。商家名单来自历史验证期的回顾性筛选，仍需在新的高峰期验证。改善情景依赖固定订单量和样本构成等假设，实际成效应通过运营试点衡量。
+
+[分析证据](reports/analysis_findings.md) · [交付验收记录](reports/release_validation.md)
