@@ -1,0 +1,22 @@
+@page { size: A4; margin: 16mm 17mm 19mm; }
+:root { color: #173038; font-family: "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", "Heiti SC", sans-serif; }
+body { font-size: 10.6pt; line-height: 1.7; margin: 0; padding: 0; max-width: none; overflow-wrap: anywhere; }
+header#title-block-header { margin: 0 0 2.4em; padding: 16mm 0 7mm; border-bottom: 3px solid #08776f; }
+header h1.title { color: #14373c; font-size: 25pt; line-height: 1.32; text-align: left; margin: 0; padding: 0; border: none; }
+h1 { font-size: 20pt; letter-spacing: -.025em; line-height: 1.2; margin: 0 0 .65em; padding-bottom: .35em; border-bottom: 1px solid #c9dcda; }
+h2 { color: #08675f; font-size: 13pt; margin: 1.15em 0 .35em; }
+h1, h2 { break-after: avoid; }
+p { margin: .55em 0 .8em; orphans: 2; widows: 2; }
+strong { color: #153c40; }
+ul, ol { padding-left: 1.7em; margin: .5em 0 1em; }
+li { margin: .3em 0; }
+table { border-collapse: collapse; width: 100%; font-size: 9.5pt; line-height: 1.48; margin: .9em 0 1.2em; break-inside: avoid; }
+th, td { padding: .55em .65em; vertical-align: top; border-bottom: 1px solid #d5e2e0; }
+thead { background: #e7f2ef; color: #144644; }
+tbody tr:nth-child(even) { background: #f5f8f7; }
+figure { margin: 1.05em auto 1.1em; padding: 0; text-align: center; break-inside: avoid; }
+figure img { display: block; max-width: 100%; max-height: 88mm; object-fit: contain; margin: 0 auto; }
+figcaption { color: #465e63; font-size: 8.4pt; text-align: left; margin-top: .38em; }
+code { font-family: "Menlo", monospace; font-size: .88em; font-variant-numeric: tabular-nums; }
+a { color: #08675f; text-decoration: underline; }
+.page-break { break-before: page; }

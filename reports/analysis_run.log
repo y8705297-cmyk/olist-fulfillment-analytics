@@ -1,0 +1,61 @@
+.venv/bin/python -m src.fetch_data
+Verified all nine local Olist v2 CSVs.
+.venv/bin/python -m src.build_data
+Built data/processed/olist.duckdb
+.venv/bin/python -m unittest discover -s tests -v
+test_business_kpis_from_raw_orders (test_model.ModelTests.test_business_kpis_from_raw_orders) ... ok
+test_category_keys (test_model.ModelTests.test_category_keys) ... ok
+test_delay_flags_and_day_differences (test_model.ModelTests.test_delay_flags_and_day_differences) ... ok
+test_item_and_payment_reconciliation_per_order (test_model.ModelTests.test_item_and_payment_reconciliation_per_order) ... ok
+test_item_money_and_volume_reconcile_across_grains (test_model.ModelTests.test_item_money_and_volume_reconcile_across_grains) ... ok
+test_no_negative_money (test_model.ModelTests.test_no_negative_money) ... ok
+test_order_key (test_model.ModelTests.test_order_key) ... ok
+test_order_seller_key_and_coverage (test_model.ModelTests.test_order_seller_key_and_coverage) ... ok
+test_raw_model_input_keys (test_model.ModelTests.test_raw_model_input_keys) ... ok
+test_review_scores_and_low_rating (test_model.ModelTests.test_review_scores_and_low_rating) ... ok
+test_review_selection_and_counts (test_model.ModelTests.test_review_selection_and_counts) ... ok
+test_same_order_ids_as_source (test_model.ModelTests.test_same_order_ids_as_source) ... ok
+test_seller_attribution (test_model.ModelTests.test_seller_attribution) ... ok
+test_seller_segments_reconcile (test_model.ModelTests.test_seller_segments_reconcile) ... ok
+test_time_anomalies_remain_visible (test_model.ModelTests.test_time_anomalies_remain_visible) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.232s
+
+OK
+MPLBACKEND=Agg MPLCONFIGDIR=data/processed/.matplotlib OPENBLAS_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 .venv/bin/python -m src.run_analysis
+Python 3.14.2, DuckDB 2.0.1, pandas 3.1.1, SciPy 1.18.1, statsmodels 0.15.0, Matplotlib 3.11.2
+Raw audit: {'Order fact grain': (99441, 99441, 99441), 'Order-seller fact grain': (100010, 100010, 100010), 'Eligibility and late flags': (0,), 'Seller priority': (0,)}
+Ratings: [(False, 89936, 89443, 8289, 0.09267354628087161), (True, 6534, 6381, 3983, 0.6241968343519825)]
+Top 10 totals: [('late volume', 1019), ('smoothed excess', 906)]
+Formal analysis checks passed: grains, aggregations, cohort eligibility, scenario, regression convergence, crude OR and clustered coefficient reconciliation
+audit_top10: 20 rows
+monthly_delivery: 25 rows
+state_delivery: 27 rows
+primary_category_delivery: 74 rows
+delivery_by_category: 74 rows
+stage_delivery: 4 rows
+peak_comparison: 4 rows
+peak_state: 108 rows
+peak_weekly: 14 rows
+november_daily: 30 rows
+period_seller_scores: 6776 rows
+threshold_ranks: 2453 rows
+threshold_coverage: 9 rows
+seller_followup: 96 rows
+final_seller_queue: 21 rows
+final_seller_stages: 42 rows
+final_scenario: 4 rows
+audit_cohort_peak_segments: 219 rows
+final_seller_peak_sensitivity: 4 rows
+seller_threshold_overlap: 3 rows
+seller_temporal_stability: 3 rows
+review_risk_difference: 7 rows
+review_delay_bands: 5 rows
+review_logit: 9 rows
+review_coverage: 2 rows
+Figure: monthly_delivery.png
+Figure: delivery_segments.png
+Figure: fulfillment_stages.png
+Figure: delay_and_ratings.png
+Figure: seller_stability.png
